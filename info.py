@@ -47,7 +47,7 @@ def negate_sequence(text):
             pprev = prev
         prev = negated
 
-        if any(neg in word for neg in ["not", "n't", "no"]):
+        if stripped in ["not", "cannot", "no"] or stripped.endswith("n't"):
             negation = not negation
 
         if any(c in word for c in delims):
@@ -59,7 +59,7 @@ def negate_sequence(text):
 def train():
     global pos, neg, totals
     retrain = False
-    
+
     # Load counts if they already exist.
     if not retrain and os.path.isfile(CDATA_FILE):
         pos, neg, totals = cPickle.load(open(CDATA_FILE))
@@ -74,12 +74,12 @@ def train():
         for word in set(negate_sequence(open("./aclImdb/train/neg/" + file).read())):
             neg[word] += 1
             pos['not_' + word] += 1
-    
+
     prune_features()
 
     totals[0] = sum(pos.values())
     totals[1] = sum(neg.values())
-    
+
     countdata = (pos, neg, totals)
     cPickle.dump(countdata, open(CDATA_FILE, 'w'))
 
@@ -104,7 +104,7 @@ def classify2(text):
 
 def classify_demo(text):
     words = set(word for word in negate_sequence(text) if word in pos or word in neg)
-    if (len(words) == 0): 
+    if (len(words) == 0):
         print "No features to compare on"
         return True
 
